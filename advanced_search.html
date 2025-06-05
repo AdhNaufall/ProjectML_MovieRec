@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Advanced Movie Search</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body class="advanced-page">
+    <header class="app-header">
+        <nav>
+            <a href="{{ url_for('index') }}" class="{{ 'active' if request.endpoint == 'index' else '' }}">
+                <span class="nav-icon">📅</span>
+                <span>By Year</span>
+            </a>
+            <a href="{{ url_for('genre_page') }}" class="{{ 'active' if request.endpoint == 'genre_page' else '' }}">
+                <span class="nav-icon">🎬</span>
+                <span>By Genre</span>
+            </a>
+            <a href="{{ url_for('advanced_search_page') }}" class="{{ 'active' if request.endpoint == 'advanced_search_page' else '' }}">
+                <span class="nav-icon">🔍</span>
+                <span>Advanced Search</span>
+            </a>
+            <a href="{{ url_for('recommendations_page') }}" class="{{ 'active' if request.endpoint == 'recommendations_page' else '' }}">
+                <span class="nav-icon">👤</span>
+                <span>Personalized Recs</span>
+            </a>
+            <a href="{{ url_for('similar_movies_page') }}" class="{{ 'active' if request.endpoint == 'similar_movies_page' else '' }}"> 
+                <span class="nav-icon">🔗</span>
+                <span>Similar Movies</span>
+            </a>
+        </nav>
+    </header>
+
+    <div class="background-decoration"></div>
+    <div class="container">
+        <div class="header-section">
+            <div class="header-badge">
+                <span class="badge-icon">🔍</span>
+                Advanced Search
+            </div>
+            <h1>Advanced Movie Search</h1>
+            <p class="subtitle">Find top 10 movies with specific criteria and detailed filters</p>
+        </div>
+
+        <div class="form-container">
+            <form id="advanced-search-form">
+                <div class="input-group">
+                    <label for="adv-genre">Genre (Optional)</label>
+                    <input type="text" id="adv-genre" name="genre" placeholder="e.g. Action, Sci-Fi">
+                </div>
+
+                <div class="input-row">
+                    <div class="input-group">
+                        <label for="adv-start-year">Min. Year (Optional)</label>
+                        <input type="text" id="adv-start-year" name="start_year" placeholder="e.g. 1990">
+                    </div>
+                    <div class="input-group">
+                        <label for="adv-end-year">Max. Year (Optional)</label>
+                        <input type="text" id="adv-end-year" name="end_year" placeholder="e.g. 2023">
+                    </div>
+                </div>
+
+                <div class="input-group">
+                    <label for="adv-min-rating">Min. Average Rating (Optional, 0-5)</label>
+                    <input type="number" id="adv-min-rating" name="min_rating" placeholder="e.g. 3.5" step="0.1" min="0" max="5">
+                </div>
+
+                <button type="submit">
+                    <span>Search Movies</span>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M21 21L15.0001 15M17 10C17 13.866 13.866 17 10 17C6.13401 17 3 13.866 3 10C3 6.13401 6.13401 3 10 3C13.866 3 17 6.13401 17 10Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </button>
+            </form>
+
+            <div id="advanced-search-results">
+                <!-- Results will be injected here by JavaScript -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById("advanced-search-form").addEventListener("submit", function(event) {
+            event.preventDefault();
+            const genre = document.getElementById("adv-genre").value.trim();
+            const startYear = document.getElementById("adv-start-year").value.trim();
+            const endYear = document.getElementById("adv-end-year").value.trim();
+            const minRating = document.getElementById("adv-min-rating").value.trim();
+            const resultsDiv = document.getElementById("advanced-search-results");
+
+            resultsDiv.innerHTML = '<div class="loading">Searching for movies...</div>';
+
+            const queryParams = new URLSearchParams();
+            if (genre) queryParams.append('genre', genre);
+            if (startYear) queryParams.append('start_year', startYear);
+            if (endYear) queryParams.append('end_year', endYear);
+            if (minRating) queryParams.append('min_rating', minRating);
+
+            if (queryParams.toString() === "") {
+                resultsDiv.innerHTML = `<div class="no-results">Please enter at least one search criterion.</div>`;
+                return;
+            }
+
+            fetch(`/advanced_search_results?${queryParams.toString()}`)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`Server responded with ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    let output = '';
+                    if (Array.isArray(data) && data.length > 0) {
+                        output = `<div class="results-header"><h2>Search Results</h2></div><div class="movies-grid">`;
+                        data.forEach((movie, index) => {
+                            output += `
+                                <div class="movie-card" style="animation-delay: ${index * 0.1}s">
+                                    <div class="movie-rank">#${index + 1}</div>
+                                    <div class="movie-info">
+                                        <h3 class="movie-title">${movie.title}</h3>
+                                        <p class="movie-details">Year: ${movie.year} <br> Genres: ${movie.genres}</p>
+                                        <div class="movie-rating">Rating: ${movie.rating}</div> 
+                                    </div>
+                                </div>
+                            `;
+                        });
+                        output += "</div>";
+                    } else {
+                        output = `<div class="no-results">No movies found matching your criteria. Please try different filters.</div>`;
+                    }
+                    resultsDiv.innerHTML = output;
+                })
+                .catch(error => {
+                    console.error('Error fetching advanced search results:', error);
+                    resultsDiv.innerHTML = `<div class="no-results">${error.message || 'An error occurred. Please try again.'}</div>`;
+                });
+        });
+    </script>
+</body>
+</html>

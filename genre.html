@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Movie Recommendations by Genre</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body class="genre-page">
+    <header class="app-header">
+        <nav>
+            <a href="{{ url_for('index') }}" class="{{ 'active' if request.endpoint == 'index' else '' }}">
+                <span class="nav-icon">📅</span>
+                <span>By Year</span>
+            </a>
+            <a href="{{ url_for('genre_page') }}" class="{{ 'active' if request.endpoint == 'genre_page' else '' }}">
+                <span class="nav-icon">🎬</span>
+                <span>By Genre</span>
+            </a>
+            <a href="{{ url_for('advanced_search_page') }}" class="{{ 'active' if request.endpoint == 'advanced_search_page' else '' }}">
+                <span class="nav-icon">🔍</span>
+                <span>Advanced Search</span>
+            </a>
+            <a href="{{ url_for('recommendations_page') }}" class="{{ 'active' if request.endpoint == 'recommendations_page' else '' }}">
+                <span class="nav-icon">👤</span>
+                <span>Personalized Recs</span>
+            </a>
+            <a href="{{ url_for('similar_movies_page') }}" class="{{ 'active' if request.endpoint == 'similar_movies_page' else '' }}"> 
+                <span class="nav-icon">🔗</span>
+                <span>Similar Movies</span>
+            </a>
+        </nav>
+    </header>
+
+    <div class="background-decoration"></div>
+    <div class="container">
+        <div class="header-section">
+            <div class="header-badge">
+                <span class="badge-icon">🎬</span>
+                Explore by Genre
+            </div>
+            <h1>Find Movies by Genre</h1>
+            <p class="subtitle">Explore the top 10 movies by your favorite genre and discover new favorites</p>
+        </div>
+
+        <div class="form-container">
+            <form id="genre-form">
+                <div class="input-group">
+                    <label for="genre">Enter a Genre</label>
+                    <input type="text" id="genre" name="genre" placeholder="e.g. Action, Comedy, Drama" required>
+                </div>
+                <button type="submit">
+                    <span>Get Movies</span>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M5 12H19M19 12L12 5M19 12L12 19" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </button>
+            </form>
+
+            <div id="genre-results">
+                <!-- Results will be injected here by JavaScript -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById("genre-form").addEventListener("submit", function(event) {
+            event.preventDefault();
+            const genreInput = document.getElementById("genre").value.trim();
+            const resultsDiv = document.getElementById("genre-results");
+
+            if (!genreInput) {
+                resultsDiv.innerHTML = `<div class="no-results">Please enter a genre.</div>`;
+                return;
+            }
+
+            resultsDiv.innerHTML = '<div class="loading">Searching for movies...</div>';
+
+            fetch(`/movies_by_genre?genre=${encodeURIComponent(genreInput)}`)
+                .then(response => {
+                    if (!response.ok) {
+                        return response.json().then(errData => {
+                            throw new Error(errData.message || `Server responded with ${response.status}`);
+                        });
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    let output = '';
+                    const displayGenre = genreInput.charAt(0).toUpperCase() + genreInput.slice(1).toLowerCase();
+
+                    if (data.message) {
+                        output = `<div class="no-results">${data.message}</div>`;
+                    } else if (Array.isArray(data) && data.length > 0) {
+                        output = `<div class="results-header"><h2>Top Movies in ${displayGenre}</h2></div><div class="movies-grid">`;
+                        data.forEach((movie, index) => {
+                            output += `
+                                <div class="movie-card" style="animation-delay: ${index * 0.1}s">
+                                    <div class="movie-rank">#${index + 1}</div>
+                                    <div class="movie-info">
+                                        <h3 class="movie-title">${movie.title}</h3>
+                                        <div class="movie-rating">Rating: ${movie.rating}</div>
+                                    </div>
+                                </div>
+                            `;
+                        });
+                        output += "</div>";
+                    } else {
+                        output = `<div class="no-results">No movies found for the genre '${displayGenre}'.</div>`;
+                    }
+                    resultsDiv.innerHTML = output;
+                })
+                .catch(error => {
+                    console.error('Error fetching genre results:', error);
+                    resultsDiv.innerHTML = `<div class="no-results">${error.message || 'An error occurred. Please try again.'}</div>`;
+                });
+        });
+    </script>
+</body>
+</html>

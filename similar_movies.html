@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Find Similar Movies</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body class="genre-page"> <!-- Menggunakan tema genre -->
+    <header class="app-header">
+        <nav>
+            <a href="{{ url_for('index') }}" class="{{ 'active' if request.endpoint == 'index' else '' }}">
+                <span class="nav-icon">📅</span>
+                <span>By Year</span>
+            </a>
+            <a href="{{ url_for('genre_page') }}" class="{{ 'active' if request.endpoint == 'genre_page' else '' }}">
+                <span class="nav-icon">🎬</span>
+                <span>By Genre</span>
+            </a>
+            <a href="{{ url_for('advanced_search_page') }}" class="{{ 'active' if request.endpoint == 'advanced_search_page' else '' }}">
+                <span class="nav-icon">🔍</span>
+                <span>Advanced Search</span>
+            </a>
+            <a href="{{ url_for('recommendations_page') }}" class="{{ 'active' if request.endpoint == 'recommendations_page' else '' }}">
+                <span class="nav-icon">👤</span>
+                <span>Personalized Recs</span>
+            </a>
+            <a href="{{ url_for('similar_movies_page') }}" class="{{ 'active' if request.endpoint == 'similar_movies_page' else '' }}">
+                <span class="nav-icon">🔗</span>
+                <span>Similar Movies</span>
+            </a>
+        </nav>
+    </header>
+
+    <div class="background-decoration"></div>
+    <div class="container">
+        <div class="header-section">
+            <div class="header-badge">
+                <span class="badge-icon">🔗</span>
+                Discover Similar Titles
+            </div>
+            <h1>Find Movies Similar To...</h1>
+            <p class="subtitle">Enter a movie title to find others like it, based on learned similarities.</p>
+        </div>
+
+        <div class="form-container">
+            <form id="similar-form">
+                <div class="input-group">
+                    <label for="movie_title_input">Enter Movie Title</label>
+                    <input type="text" id="movie_title_input" name="movie_title" placeholder="e.g. Toy Story, The Matrix" required>
+                    <small>Enter the full title or a significant part of it.</small>
+                </div>
+                <button type="submit">
+                    <span>Find Similar</span>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M21 21L15.0001 15M17 10C17 13.866 13.866 17 10 17C6.13401 17 3 13.866 3 10C3 6.13401 6.13401 3 10 3C13.866 3 17 6.13401 17 10Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </button>
+            </form>
+
+            <div id="similar-results">
+                <!-- Results will be injected here by JavaScript -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById("similar-form").addEventListener("submit", function(event) {
+            event.preventDefault();
+            const movieTitleInput = document.getElementById("movie_title_input").value.trim(); // Mengambil nilai dari input teks
+            const resultsDiv = document.getElementById("similar-results");
+
+            if (!movieTitleInput) {
+                resultsDiv.innerHTML = `<div class="no-results">Please enter a movie title.</div>`;
+                return;
+            }
+
+            resultsDiv.innerHTML = '<div class="loading">Finding similar movies...</div>';
+
+            // Mengirim movie_title ke backend
+            fetch(`/get_similar_movies_by_title?movie_title=${encodeURIComponent(movieTitleInput)}`)
+                .then(response => {
+                    if (!response.ok) {
+                        return response.json().then(errData => {
+                            throw new Error(errData.message || `Server responded with ${response.status}`);
+                        });
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    let output = '';
+                    if (data.message && !data.similar_movies) {
+                        output = `<div class="no-results">${data.message}</div>`;
+                    } else if (data.similar_movies && data.similar_movies.length > 0) {
+                        output = `<div class="results-header"><h2>Movies Similar to "${data.target_movie_title}"</h2></div><div class="movies-grid">`;
+                        data.similar_movies.forEach((movie, index) => {
+                            output += `
+                                <div class="movie-card" style="animation-delay: ${index * 0.1}s">
+                                    <div class="movie-rank">#${index + 1}</div>
+                                    <div class="movie-info">
+                                        <h3 class="movie-title">${movie.title}</h3>
+                                    </div>
+                                </div>
+                            `;
+                        });
+                        output += "</div>";
+                    } else {
+                        const searchedTitle = data.searched_title || movieTitleInput;
+                        output = `<div class="no-results">No similar movies found for "${searchedTitle}". The movie might not be in our database, or it may not have enough rating data for similarity calculation.</div>`;
+                    }
+                    resultsDiv.innerHTML = output;
+                })
+                .catch(error => {
+                    console.error('Error fetching similar movies:', error);
+                    resultsDiv.innerHTML = `<div class="no-results">${error.message || 'An error occurred. Please try again.'}</div>`;
+                });
+        });
+    </script>
+</body>
+</html>

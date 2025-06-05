@@ -1,0 +1,807 @@
+/* Modern Professional Movie Recommendation UI */
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap");
+
+/* CSS Variables */
+:root {
+  /* Modern Color Palette */
+  --primary-blue: #3b82f6;
+  --primary-blue-dark: #1d4ed8;
+  --primary-purple: #8b5cf6; /* Warna utama untuk tema Genre & Similar */
+  --primary-purple-dark: #7c3aed; /* Warna hover/gelap untuk tema Genre & Similar */
+  --primary-emerald: #10b981;
+  --accent-cyan: #06b6d4;
+  --accent-pink: #ec4899; /* Aksen untuk tema Genre & Similar */
+
+  /* Dark Theme Background */
+  --bg-primary: #0f172a;
+  --bg-secondary: #1e293b;
+  --bg-tertiary: #334155;
+  --surface: #1e293b;
+  --surface-glass: rgba(30, 41, 59, 0.5);
+  --surface-hover: rgba(51, 65, 85, 0.5);
+
+  /* Text Colors */
+  --text-primary: #f8fafc;
+  --text-secondary: #cbd5e1;
+  --text-muted: #94a3b8;
+  --text-accent: #60a5fa; /* Aksen default biru */
+  --text-accent-purple: #c084fc; /* Aksen ungu untuk tema Genre & Similar */
+  --text-accent-emerald: #34d399; /* Aksen hijau untuk tema Advanced */
+
+
+  /* Shadows & Effects */
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.3);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.4), 0 2px 4px -2px rgb(0 0 0 / 0.4);
+  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.4), 0 4px 6px -4px rgb(0 0 0 / 0.4);
+  --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.4), 0 8px 10px -6px rgb(0 0 0 / 0.4);
+  --shadow-glow: 0 0 20px rgb(59 130 246 / 0.3);
+  --shadow-glow-purple: 0 0 20px rgba(139, 92, 246, 0.4);
+  --shadow-glow-emerald: 0 0 20px rgba(16, 185, 129, 0.4);
+
+
+  /* Border & Radius */
+  --border-color: rgba(71, 85, 105, 0.5);
+  --border-hover: #60a5fa; /* Biru default */
+  --border-hover-purple: var(--primary-purple);
+  --border-hover-emerald: var(--primary-emerald);
+  --radius-sm: 0.5rem;
+  --radius-md: 0.75rem;
+  --radius-lg: 1rem;
+  --radius-xl: 1.5rem;
+
+  /* Header height */
+  --header-height: 70px;
+}
+
+/* Global Styles */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  font-size: 16px;
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  background: linear-gradient(135deg, var(--bg-primary) 0%, var(--bg-secondary) 50%, var(--bg-primary) 100%);
+  color: var(--text-primary);
+  line-height: 1.6;
+  min-height: 100vh;
+  position: relative;
+  padding-top: var(--header-height);
+}
+
+/* Animated Background */
+.background-decoration {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: radial-gradient(circle at 20% 80%, rgba(59, 130, 246, 0.1) 0%, transparent 50%),
+    radial-gradient(circle at 80% 20%, rgba(6, 182, 212, 0.1) 0%, transparent 50%),
+    radial-gradient(circle at 40% 40%, rgba(139, 92, 246, 0.08) 0%, transparent 50%);
+  z-index: -1;
+  animation: backgroundFloat 20s ease-in-out infinite;
+}
+
+@keyframes backgroundFloat {
+  0%,
+  100% {
+    transform: translateY(0px) rotate(0deg);
+  }
+  33% {
+    transform: translateY(-10px) rotate(1deg);
+  }
+  66% {
+    transform: translateY(5px) rotate(-0.5deg);
+  }
+}
+
+/* Fixed Header Navigation */
+.app-header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: var(--header-height);
+  background: rgba(15, 23, 42, 0.8); /* bg-primary dengan alpha */
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border-color);
+  padding: 0 2rem;
+  box-shadow: var(--shadow-lg);
+  z-index: 1000;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.app-header nav {
+  display: flex;
+  gap: 0.5rem;
+  background: var(--surface-glass);
+  padding: 0.5rem;
+  border-radius: var(--radius-lg);
+  backdrop-filter: blur(8px);
+  border: 1px solid var(--border-color);
+}
+
+.app-header nav a {
+  color: var(--text-secondary);
+  text-decoration: none;
+  font-weight: 500;
+  padding: 0.75rem 1.5rem;
+  border-radius: var(--radius-md);
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.nav-icon {
+  font-size: 1.1rem;
+}
+
+.app-header nav a::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+  transition: left 0.5s;
+}
+
+.app-header nav a:hover::before {
+  left: 100%;
+}
+
+.app-header nav a:hover,
+.app-header nav a.active {
+  color: var(--text-primary);
+  background: var(--primary-blue); /* Default active/hover color */
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-glow);
+}
+
+/* Container */
+.container {
+  width: 100%;
+  max-width: 900px;
+  margin: 2rem auto;
+  background: var(--surface-glass);
+  backdrop-filter: blur(12px);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-xl);
+  border: 1px solid var(--border-color);
+  overflow: hidden;
+  position: relative;
+}
+
+/* Default top border for container */
+.container::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, var(--primary-blue), var(--accent-cyan), var(--primary-purple));
+  animation: gradientShift 3s ease-in-out infinite;
+}
+
+@keyframes gradientShift {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
+}
+
+/* Header Section */
+.header-section {
+  text-align: center;
+  padding: 3rem 2rem 2rem;
+  background: linear-gradient(135deg, var(--surface-glass) 0%, rgba(51, 65, 85, 0.3) 100%);
+  position: relative;
+}
+
+/* Default header badge */
+.header-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: rgba(59, 130, 246, 0.1); /* Default blueish */
+  color: var(--text-accent); /* Default blueish text */
+  padding: 0.5rem 1rem;
+  border-radius: 2rem;
+  font-size: 0.9rem;
+  font-weight: 500;
+  margin-bottom: 1.5rem;
+  border: 1px solid rgba(59, 130, 246, 0.2); /* Default blueish border */
+}
+
+.badge-icon {
+  font-size: 1rem;
+}
+
+.header-section h1 {
+  font-size: clamp(2rem, 5vw, 3rem);
+  font-weight: 800;
+  color: var(--text-primary);
+  margin-bottom: 1rem;
+  letter-spacing: -0.025em;
+  background: linear-gradient(135deg, var(--text-primary), var(--text-accent)); /* Default blueish gradient */
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: textGlow 2s ease-in-out infinite alternate;
+}
+
+@keyframes textGlow { /* Default blueish glow */
+  from {
+    filter: drop-shadow(0 0 5px rgba(59, 130, 246, 0.3));
+  }
+  to {
+    filter: drop-shadow(0 0 15px rgba(59, 130, 246, 0.5));
+  }
+}
+
+.subtitle {
+  font-size: 1.2rem;
+  color: var(--text-secondary);
+  font-weight: 500;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+/* Form Container */
+.form-container {
+  padding: 2.5rem;
+}
+
+.input-group {
+  margin-bottom: 2rem;
+  position: relative;
+}
+
+.input-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+label {
+  display: block;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  position: relative;
+}
+
+label::after { /* Default blueish underline */
+  content: "";
+  position: absolute;
+  bottom: -4px;
+  left: 0;
+  width: 30px;
+  height: 2px;
+  background: var(--primary-blue);
+  border-radius: 1px;
+}
+
+input[type="text"],
+input[type="number"],
+select { /* Apply base styles to select as well */
+  width: 100%;
+  padding: 1rem 1.25rem;
+  font-size: 1.1rem;
+  border: 2px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  background: rgba(15, 23, 42, 0.5);
+  color: var(--text-primary);
+  transition: all 0.3s ease;
+  font-family: inherit;
+  backdrop-filter: blur(8px);
+}
+
+select { /* Specific styles for select */
+  appearance: none; /* Remove default S.O. styling */
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20width%3D%2220%22%20height%3D%2220%22%20viewBox%3D%220%200%2020%2020%22%20fill%3D%22none%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%3Cpath%20d%3D%22M5%207.5L10%2012.5L15%207.5%22%20stroke%3D%22%2394a3b8%22%20stroke-width%3D%221.5%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%3C%2Fsvg%3E');
+  background-repeat: no-repeat;
+  background-position: right 1.25rem center;
+  padding-right: 3rem; /* Make space for the arrow */
+}
+select:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+
+input[type="text"]:focus,
+input[type="number"]:focus,
+select:focus { /* Default blueish focus */
+  outline: none;
+  border-color: var(--primary-blue);
+  box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.2);
+  background: rgba(15, 23, 42, 0.8);
+  transform: translateY(-2px);
+}
+
+input[type="text"]::placeholder,
+input[type="number"]::placeholder {
+  color: var(--text-muted);
+}
+
+/* Button */
+button[type="submit"] { /* Default blueish button */
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  width: 100%;
+  padding: 1rem 2rem;
+  font-size: 1.1rem;
+  font-weight: 600;
+  background: linear-gradient(135deg, var(--primary-blue) 0%, var(--primary-blue-dark) 100%);
+  color: white;
+  border: none;
+  border-radius: var(--radius-lg);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: var(--shadow-md);
+  position: relative;
+  overflow: hidden;
+}
+button[type="submit"]:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  background: var(--bg-tertiary);
+}
+
+button[type="submit"]::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: left 0.6s;
+}
+
+button[type="submit"]:not(:disabled):hover::before {
+  left: 100%;
+}
+
+button[type="submit"]:not(:disabled):hover { /* Default blueish hover */
+  transform: translateY(-3px);
+  box-shadow: 0 10px 25px rgba(59, 130, 246, 0.4); /* Default blueish glow */
+  background: linear-gradient(135deg, #4f46e5 0%, var(--primary-blue) 100%);
+}
+
+button[type="submit"] svg {
+  transition: transform 0.3s ease;
+}
+
+button[type="submit"]:not(:disabled):hover svg {
+  transform: translateX(4px);
+}
+
+/* Results Section */
+.results-header {
+  margin: 2rem 0 1.5rem;
+  text-align: center;
+}
+
+.results-header h2 {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 1rem;
+  position: relative;
+}
+
+.results-header h2::after { /* Default blueish/cyan underline */
+  content: "";
+  position: absolute;
+  bottom: -8px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 60px;
+  height: 3px;
+  background: linear-gradient(90deg, var(--primary-blue), var(--accent-cyan));
+  border-radius: 2px;
+}
+
+/* Loading State */
+.loading {
+  text-align: center;
+  padding: 3rem;
+  color: var(--text-secondary);
+  font-size: 1.2rem;
+  font-weight: 500;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+}
+
+.loading::after { /* Default blueish spinner */
+  content: "";
+  width: 40px;
+  height: 40px;
+  border: 3px solid var(--border-color);
+  border-top: 3px solid var(--primary-blue);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+/* Movies Grid */
+.movies-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1.5rem;
+  margin-top: 2rem;
+}
+
+.movie-card {
+  background: var(--surface-glass);
+  backdrop-filter: blur(12px);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  padding: 1.5rem;
+  transition: all 0.4s ease;
+  position: relative;
+  animation: slideUp 0.6s ease forwards;
+  opacity: 0;
+  transform: translateY(30px);
+  overflow: hidden;
+}
+
+.movie-card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.05), rgba(6, 182, 212, 0.05));
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.movie-card:hover::before {
+  opacity: 1;
+}
+
+@keyframes slideUp {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.movie-card:hover { /* Default blueish hover */
+  transform: translateY(-8px) scale(1.02);
+  box-shadow: var(--shadow-xl);
+  border-color: var(--primary-blue);
+}
+
+.movie-rank { /* Default blueish/cyan rank */
+  position: absolute;
+  top: -8px;
+  right: 1.5rem;
+  background: linear-gradient(135deg, var(--primary-blue), var(--accent-cyan));
+  color: white;
+  padding: 0.5rem 1rem;
+  border-radius: var(--radius-md);
+  font-size: 0.9rem;
+  font-weight: 700;
+  box-shadow: var(--shadow-md);
+  z-index: 2;
+}
+
+.movie-info {
+  padding-top: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  position: relative;
+  z-index: 1;
+}
+
+.movie-title {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  line-height: 1.4;
+  margin-bottom: 0.5rem;
+}
+
+.movie-details { /* Default blueish left border */
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  line-height: 1.5;
+  background: rgba(15, 23, 42, 0.3);
+  padding: 0.75rem;
+  border-radius: var(--radius-sm);
+  border-left: 3px solid var(--primary-blue);
+}
+
+.movie-rating { /* Default blueish rating bg */
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.2), rgba(6, 182, 212, 0.2));
+  color: var(--text-primary);
+  padding: 0.5rem 1rem;
+  border-radius: var(--radius-md);
+  font-size: 0.9rem;
+  font-weight: 600;
+  border: 1px solid var(--border-color);
+  backdrop-filter: blur(8px);
+  align-self: flex-start;
+}
+
+.movie-rating::before {
+  content: "⭐";
+  font-size: 1rem;
+}
+
+/* No Results */
+.no-results {
+  text-align: center;
+  padding: 3rem;
+  color: var(--text-secondary);
+  font-size: 1.2rem;
+  background: var(--surface-glass);
+  backdrop-filter: blur(12px);
+  border-radius: var(--radius-lg);
+  border: 2px dashed var(--border-color);
+  position: relative;
+}
+
+.no-results::before {
+  content: "🎬";
+  font-size: 3rem;
+  display: block;
+  margin-bottom: 1rem;
+  opacity: 0.5;
+}
+
+/* --- Page-specific themes --- */
+
+/* Theme for "By Year" and "Personalized Recs" (Default/Blue Theme) */
+/* Ini sudah menjadi default, jadi tidak perlu .year-page atau .recommendations-page secara eksplisit kecuali untuk override */
+/* Jika Anda ingin .year-page atau .recommendations-page punya variasi biru sendiri, definisikan di sini */
+/* Contoh:
+.year-page .container::before { background: linear-gradient(90deg, var(--primary-blue), var(--accent-cyan)); }
+.year-page .header-badge { background: rgba(59,130,246,0.1); color: var(--text-accent); border-color: rgba(59,130,246,0.2); }
+.year-page input:focus, .year-page select:focus { border-color: var(--primary-blue); box-shadow: 0 0 0 4px rgba(59,130,246,0.2); }
+.year-page button[type="submit"] { background: linear-gradient(135deg, var(--primary-blue) 0%, var(--primary-blue-dark) 100%); }
+.year-page button[type="submit"]:not(:disabled):hover { box-shadow: var(--shadow-glow); }
+*/
+/* Navigasi aktif untuk tema biru sudah di-handle oleh .app-header nav a.active { background: var(--primary-blue); } */
+
+
+/* Theme for "By Genre" (and "Similar Movies" if it uses .genre-page class) */
+.genre-page .container::before {
+  background: linear-gradient(90deg, var(--primary-purple), var(--accent-pink), var(--primary-blue));
+}
+.genre-page .header-badge {
+  background: rgba(139, 92, 246, 0.1); /* Ungu muda transparan */
+  color: var(--text-accent-purple); /* Teks ungu */
+  border-color: rgba(139, 92, 246, 0.2); /* Border ungu */
+}
+.genre-page label::after { /* Garis bawah label ungu */
+  background: var(--primary-purple);
+}
+.genre-page input[type="text"]:focus,
+.genre-page input[type="number"]:focus,
+.genre-page select:focus {
+  border-color: var(--primary-purple);
+  box-shadow: 0 0 0 4px rgba(139, 92, 246, 0.2); /* Glow ungu */
+}
+.genre-page button[type="submit"] {
+  background: linear-gradient(135deg, var(--primary-purple) 0%, var(--primary-purple-dark) 100%);
+}
+.genre-page button[type="submit"]:not(:disabled):hover {
+  box-shadow: var(--shadow-glow-purple);
+  background: linear-gradient(135deg, var(--primary-purple-dark) 0%, var(--primary-purple) 100%);
+}
+.genre-page .results-header h2::after { /* Garis bawah judul hasil ungu */
+  background: linear-gradient(90deg, var(--primary-purple), var(--accent-pink));
+}
+.genre-page .loading::after { /* Spinner ungu */
+    border-top: 3px solid var(--primary-purple);
+}
+.genre-page .movie-card:hover { /* Hover kartu film ungu */
+  border-color: var(--primary-purple);
+}
+.genre-page .movie-rank { /* Rank badge ungu */
+  background: linear-gradient(135deg, var(--primary-purple), var(--accent-pink));
+}
+.genre-page .movie-details { /* Detail film border kiri ungu */
+  border-left: 3px solid var(--primary-purple);
+}
+.genre-page .movie-rating { /* Rating badge background ungu */
+  background: linear-gradient(135deg, rgba(139, 92, 246, 0.2), rgba(236, 72, 153, 0.2));
+}
+.genre-page .app-header nav a.active { /* Navigasi aktif untuk tema ungu */
+    background: var(--primary-purple);
+    box-shadow: var(--shadow-glow-purple);
+}
+
+
+/* Theme for "Advanced Search" */
+.advanced-page .container::before {
+  background: linear-gradient(90deg, var(--primary-emerald), var(--accent-cyan), var(--primary-blue));
+}
+.advanced-page .header-badge {
+  background: rgba(16, 185, 129, 0.1); /* Hijau muda transparan */
+  color: var(--text-accent-emerald); /* Teks hijau */
+  border-color: rgba(16, 185, 129, 0.2); /* Border hijau */
+}
+.advanced-page label::after { /* Garis bawah label hijau */
+  background: var(--primary-emerald);
+}
+.advanced-page input[type="text"]:focus,
+.advanced-page input[type="number"]:focus,
+.advanced-page select:focus {
+  border-color: var(--primary-emerald);
+  box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.2); /* Glow hijau */
+}
+.advanced-page button[type="submit"] {
+  background: linear-gradient(135deg, var(--primary-emerald) 0%, #059669 100%);
+}
+.advanced-page button[type="submit"]:not(:disabled):hover {
+  box-shadow: var(--shadow-glow-emerald);
+  background: linear-gradient(135deg, #059669 0%, var(--primary-emerald) 100%);
+}
+.advanced-page .results-header h2::after { /* Garis bawah judul hasil hijau */
+  background: linear-gradient(90deg, var(--primary-emerald), var(--accent-cyan));
+}
+.advanced-page .loading::after { /* Spinner hijau */
+    border-top: 3px solid var(--primary-emerald);
+}
+.advanced-page .movie-card:hover { /* Hover kartu film hijau */
+  border-color: var(--primary-emerald);
+}
+.advanced-page .movie-rank { /* Rank badge hijau */
+  background: linear-gradient(135deg, var(--primary-emerald), var(--accent-cyan));
+}
+.advanced-page .movie-details { /* Detail film border kiri hijau */
+  border-left: 3px solid var(--primary-emerald);
+}
+.advanced-page .movie-rating { /* Rating badge background hijau */
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.2), rgba(6, 182, 212, 0.2));
+}
+.advanced-page .app-header nav a.active { /* Navigasi aktif untuk tema hijau */
+    background: var(--primary-emerald);
+    box-shadow: var(--shadow-glow-emerald);
+}
+
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  body {
+    padding-top: calc(var(--header-height) - 10px);
+  }
+
+  .app-header {
+    padding: 0 1rem;
+    height: calc(var(--header-height) - 10px);
+  }
+
+  .app-header nav {
+    gap: 0.25rem;
+    padding: 0.25rem;
+    flex-wrap: wrap; /* Agar navigasi bisa wrap jika terlalu banyak item */
+    justify-content: center;
+  }
+
+  .app-header nav a {
+    padding: 0.5rem 1rem;
+    font-size: 0.9rem;
+  }
+
+  .app-header nav a span:not(.nav-icon) { /* Sembunyikan teks di mobile, tampilkan ikon saja */
+    display: none;
+  }
+  /* Kecuali jika ada ruang lebih atau user memaksa landscape */
+  @media (min-width: 580px) {
+    .app-header nav a span:not(.nav-icon) {
+        display: inline; /* Tampilkan kembali teks jika lebar cukup */
+    }
+  }
+
+
+  .container {
+    margin: 1rem;
+    border-radius: var(--radius-lg);
+  }
+
+  .header-section {
+    padding: 2rem 1.5rem 1.5rem;
+  }
+
+  .form-container {
+    padding: 2rem 1.5rem;
+  }
+
+  .input-row {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+    margin-bottom: 1rem; /* Kurangi margin bawah agar tidak terlalu jauh dari tombol */
+  }
+  .input-group {
+    margin-bottom: 1.5rem; /* Kurangi margin bawah agar tidak terlalu jauh dari tombol */
+  }
+
+
+  .movies-grid {
+    grid-template-columns: 1fr; /* Satu kolom di mobile */
+    gap: 1rem;
+  }
+
+  .movie-card {
+    padding: 1.25rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .app-header nav a {
+    font-size: 0.8rem;
+    padding: 0.4rem 0.8rem;
+  }
+
+  .header-section h1 {
+    font-size: 1.8rem;
+  }
+
+  .subtitle {
+    font-size: 1rem;
+  }
+
+  input[type="text"],
+  input[type="number"],
+  select {
+    padding: 0.875rem 1rem;
+    font-size: 1rem;
+  }
+  select {
+    background-position: right 1rem center;
+    padding-right: 2.5rem;
+  }
+
+
+  button[type="submit"] {
+    padding: 0.875rem 1.5rem;
+    font-size: 1rem;
+  }
+}

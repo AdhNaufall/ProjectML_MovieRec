@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Personalized Movie Recommendations (SVD)</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body class="recommendations-page">
+    <header class="app-header">
+        <nav>
+            <a href="{{ url_for('index') }}" class="{{ 'active' if request.endpoint == 'index' else '' }}">
+                <span class="nav-icon">📅</span>
+                <span>By Year</span>
+            </a>
+            <a href="{{ url_for('genre_page') }}" class="{{ 'active' if request.endpoint == 'genre_page' else '' }}">
+                <span class="nav-icon">🎬</span>
+                <span>By Genre</span>
+            </a>
+            <a href="{{ url_for('advanced_search_page') }}" class="{{ 'active' if request.endpoint == 'advanced_search_page' else '' }}">
+                <span class="nav-icon">🔍</span>
+                <span>Advanced Search</span>
+            </a>
+            <a href="{{ url_for('recommendations_page') }}" class="{{ 'active' if request.endpoint == 'recommendations_page' else '' }}">
+                <span class="nav-icon">👤</span>
+                <span>Personalized Recs</span>
+            </a>
+            <a href="{{ url_for('similar_movies_page') }}" class="{{ 'active' if request.endpoint == 'similar_movies_page' else '' }}"> 
+                <span class="nav-icon">🔗</span>
+                <span>Similar Movies</span>
+            </a>
+        </nav>
+    </header>
+
+    <div class="background-decoration"></div>
+    <div class="container">
+        <div class="header-section">
+            <div class="header-badge">
+                <span class="badge-icon">👤</span>
+                Personalized For You
+            </div>
+            <h1>Personalized Recommendations</h1>
+            <p class="subtitle">Enter your User ID to get personalized movie recommendations based on Collaborative Filtering (SVD).</p>
+        </div>
+
+        <div class="form-container">
+            <form id="recs-form">
+                <div class="input-group">
+                    <label for="user_id">Enter Your User ID</label>
+                    <input type="text" id="user_id" name="user_id" placeholder="e.g. 1, 15, 200" required>
+                </div>
+                <button type="submit">
+                    <span>Get Recommendations</span>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M5 12H19M19 12L12 5M19 12L12 19" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </button>
+            </form>
+
+            <div id="recs-results">
+                <!-- Results will be injected here by JavaScript -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById("recs-form").addEventListener("submit", function(event) {
+            event.preventDefault();
+            const userIdInput = document.getElementById("user_id").value.trim();
+            const resultsDiv = document.getElementById("recs-results");
+
+            if (!userIdInput) {
+                resultsDiv.innerHTML = `<div class="no-results">Please enter a User ID.</div>`;
+                return;
+            }
+            if (!/^\d+$/.test(userIdInput)) {
+                resultsDiv.innerHTML = `<div class="no-results">User ID must be a number.</div>`;
+                return;
+            }
+
+
+            resultsDiv.innerHTML = '<div class="loading">Fetching recommendations...</div>';
+
+            fetch(`/get_recommendations?user_id=${encodeURIComponent(userIdInput)}`)
+                .then(response => {
+                    if (!response.ok) {
+                        return response.json().then(errData => {
+                            throw new Error(errData.message || `Server responded with ${response.status}`);
+                        });
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    let output = '';
+                    if (data.message && !data.recommendations) { // Pesan error atau info tanpa rekomendasi
+                        output = `<div class="no-results">${data.message}</div>`;
+                    } else if (data.message && data.recommendations && data.recommendations.length > 0) { // Pesan fallback dengan rekomendasi
+                         output = `<div class="results-header"><h2>${data.message}</h2></div><div class="movies-grid">`;
+                         data.recommendations.forEach((movie, index) => {
+                            output += `
+                                <div class="movie-card" style="animation-delay: ${index * 0.1}s">
+                                    <div class="movie-rank">#${index + 1}</div>
+                                    <div class="movie-info">
+                                        <h3 class="movie-title">${movie.title}</h3>
+                                        <div class="movie-rating">Predicted Rating: ${movie.predicted_rating}</div>
+                                    </div>
+                                </div>
+                            `;
+                        });
+                        output += "</div>";
+                    } else if (Array.isArray(data) && data.length > 0) { // Rekomendasi SVD sukses
+                        output = `<div class="results-header"><h2>Top Recommendations for User ${userIdInput}</h2></div><div class="movies-grid">`;
+                        data.forEach((movie, index) => {
+                            output += `
+                                <div class="movie-card" style="animation-delay: ${index * 0.1}s">
+                                    <div class="movie-rank">#${index + 1}</div>
+                                    <div class="movie-info">
+                                        <h3 class="movie-title">${movie.title}</h3>
+                                        <div class="movie-rating">Predicted Rating: ${movie.predicted_rating}</div>
+                                    </div>
+                                </div>
+                            `;
+                        });
+                        output += "</div>";
+                    } else {
+                        output = `<div class="no-results">No recommendations found for User ID ${userIdInput}. This might happen if the user is new or has rated very few movies.</div>`;
+                    }
+                    resultsDiv.innerHTML = output;
+                })
+                .catch(error => {
+                    console.error('Error fetching SVD recommendations:', error);
+                    resultsDiv.innerHTML = `<div class="no-results">${error.message || 'An error occurred while fetching recommendations. Please try again.'}</div>`;
+                });
+        });
+    </script>
+</body>
+</html>
